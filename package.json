@@ -1,0 +1,19 @@
+{
+  "name": "discord-guard-bot",
+  "version": "1.0.0",
+  "description": "Discord.js v14 guard bot.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "discord",
+    "guard",
+    "bot"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.1.0"
+  }
+}
