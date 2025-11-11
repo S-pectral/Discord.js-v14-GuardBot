@@ -112,4 +112,4 @@ Geliştirmelere katkıda bulunmak isterseniz, lütfen bir pull request gönderin
 
 ## Lisans
 
-Bu proje MIT Lisansı altında lisanslanmıştır. Daha fazla bilgi için `LICENSE` dosyasına bakınız.
+Bu proje Apache 2.0 Lisansı altında lisanslanmıştır. Daha fazla bilgi için `LICENSE` dosyasına bakınız.

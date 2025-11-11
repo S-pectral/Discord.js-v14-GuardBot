@@ -1,0 +1,45 @@
+{
+    "token": "YOUR_BOT_TOKEN",
+    "prefix": "!",
+    "whitelist": [
+        "YOUR_OWN_USER_ID",
+        "BOT_USER_ID"
+    ],
+    "logChannel": "YOUR_LOG_CHANNEL_ID",
+    "linkAllowedChannels": [],
+    "linkAllowedRoles": [],
+    "jailRoleId": "YOUR_JAIL_ROLE_ID",
+    "settings": {
+        "profanityFilter": {
+            "enabled": true,
+            "bannedWords": [
+                "küfür1",
+                "küfür2"
+            ]
+        },
+        "spam": {
+            "enabled": true,
+            "warningCount": 5,
+            "interval": 10000
+        },
+        "raid": {
+            "enabled": true,
+            "userCount": 10,
+            "time": 10000
+        },
+        "channel": {
+            "create": true,
+            "delete": true,
+            "update": true
+        },
+        "role": {
+            "create": true,
+            "delete": true,
+            "update": true
+        },
+        "banProtection": true,
+        "kickProtection": true,
+        "link": true,
+        "webhook": true
+    }
+}
