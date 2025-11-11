@@ -27,12 +27,17 @@ Guard Bot, Discord sunucunuzu spam, raid, yetkisiz kanal/rol değişiklikleri, i
 
 1.  **Dosyayı indirin:**
 
-2.  **Bağımlılıkları Yükleyin:**
+2.  **Dosya konumuna gidin:**
+    ```bash
+    cd C:\Users\"INDIRDIĞINIZ KONUM"\Discord.js-v14-GuardBot-main
+    ```
+
+3.  **Bağımlılıkları Yükleyin:**
     ```bash
     npm install
     ```
 
-3.  **`config.json` Dosyasını Yapılandırın:**
+4.  **`config.json` Dosyasını Yapılandırın:**
    `config.json` dosyasını projenizin ana dizininde oluşturun veya mevcutsa düzenleyin. Aşağıdaki gibi bir yapıya sahip olmalıdır:
    ```json
    {
