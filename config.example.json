@@ -1,20 +1,21 @@
 {
     "token": "YOUR_BOT_TOKEN",
     "prefix": "!",
+    "clientId": "...",
+    "guildId": "...",
     "whitelist": [
-        "YOUR_OWN_USER_ID",
-        "BOT_USER_ID"
+        "YOUR_OWN_USER_ID"
     ],
-    "logChannel": "YOUR_LOG_CHANNEL_ID",
+    "logChannel": "...",
     "linkAllowedChannels": [],
     "linkAllowedRoles": [],
-    "jailRoleId": "YOUR_JAIL_ROLE_ID",
     "settings": {
         "profanityFilter": {
             "enabled": true,
             "bannedWords": [
-                "küfür1",
-                "küfür2"
+                "amk", "aq", "sik", "siktir", "orospu", "piç", "göt", "yarrak", "amcık", "pezevenk", 
+                "yavşak", "ibne", "gavat", "döl", "sikik", "sokuk", "amına", "amina", "sikim", "sikeyim",
+                "kaltak", "kahpe", "sg", "oç", "amq", "domal", "meme", "taşşak", "siktr"
             ]
         },
         "spam": {

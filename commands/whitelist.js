@@ -130,7 +130,7 @@ module.exports = {
                 });
             }
             if (user.id === message.client.user.id) {
-                await sendLog(message.guild, `:x:  Whitelist'ten Çıkarılamaz \n:kullanci: Kullanıcı: ${user.tag} (${user.id})\n:ekle: Ekleyen: ${message.author.tag}`);
+                await sendLog(message.guild, `❌ Whitelist'ten Çıkarılamaz \nKullanıcı: ${user.tag} (${user.id})\nİşlemi Yapan: ${message.author.tag}`);
                 return message.reply({ content: 'Botu whitelist\'ten çıkaramazsınız.' }).catch(() => {
                     message.channel.send('Botu whitelist\'ten çıkaramazsınız.');
                 });
@@ -157,7 +157,7 @@ module.exports = {
 
             const replyEmbed = new EmbedBuilder()
                 .setColor('#ED4245')
-                .setTitle('🗑️ Whitelist\'ten Çıkarıldı')
+                .setTitle('❌ Whitelist\'ten Çıkarıldı')
                 .setDescription(`**${user.tag}** başarıyla beyaz listeden çıkarıldı.`)
                 .addFields(
                     { name: 'Kullanıcı', value: `${user.tag}\n(\`${user.id}\`)`, inline: true },

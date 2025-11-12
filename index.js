@@ -17,8 +17,28 @@ client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
+   const filePath = path.join(__dirname, 'commands', file);
+    const command = require(filePath);
+    if ('data' in command && 'execute' in command) {
+        // Slash komutu
+        client.commands.set(command.data.name, command);
+    } else if ('name' in command && 'execute' in command) {
+        // Prefix komutu
+        client.commands.set(command.name, command);
+    }
+}
+
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+	const filePath = path.join(eventsPath, file);
+	const event = require(filePath);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args, client));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args, client));
+	}
 }
 
 const userMessages = new Map();
@@ -39,97 +59,26 @@ client.once('ready', () => {
 	console.log('Bot hazır!');
 });
 
-client.on('messageCreate', message => {
-    if (message.author.bot) return;
-    const { prefix, whitelist, settings } = getConfig();
-
-   
-    if (settings.spam.enabled && !whitelist.includes(message.author.id)) {
-        const now = Date.now();
-        const user = userMessages.get(message.author.id);
-
-        if (user) {
-            const msgCount = user.msgCount;
-            const time = user.time;
-
-            if (now - time < settings.spam.interval) {
-                if (msgCount + 1 >= settings.spam.warningCount) { 
-                    message.delete();
-                    message.channel.send(`${message.author}, çok hızlı mesaj gönderiyorsun! Lütfen yavaşla.`).then(msg => {
-                        setTimeout(() => msg.delete(), 5000);
-                    });
-                } else {
-                    user.msgCount++;
-                }
-            } else {
-                user.msgCount = 1;
-                user.time = now;
-            }
-        } else {
-            userMessages.set(message.author.id, { msgCount: 1, time: now });
-        }
-    }
-
-  
-    if (settings.profanityFilter.enabled && !whitelist.includes(message.author.id)) {
-        const bannedWords = settings.profanityFilter.bannedWords;
-        const hasBannedWord = bannedWords.some(word => message.content.toLowerCase().includes(word.toLowerCase()));
-
-        if (hasBannedWord) {
-            message.delete().catch(() => {}); 
-            sendLog(message.guild, `:no_entry_sign: ${message.author.tag} tarafından gönderilen küfür içeren mesaj silindi: ||${message.content}||`);
-            message.channel.send(`${message.author}, bu sunucuda argo veya küfürlü dil kullanamazsınız!`).then(msg => {
-                setTimeout(() => msg.delete(), 5000);
-            });
-            return; 
-        }
-    }
-
- 
-    const { linkAllowedChannels, linkAllowedRoles } = getConfig();
-    const memberHasAllowedRole = message.member && message.member.roles.cache.some(role => linkAllowedRoles.includes(role.id));
-
-    if (settings.link && !whitelist.includes(message.author.id) && !linkAllowedChannels.includes(message.channel.id) && !memberHasAllowedRole) {
-        const linkRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/i;
-        const gifRegex = /https?:\/\/.*(giphy\.com|tenor\.com)\/.*|https?:\/\/.*\.gif/i;
-        const inviteRegex = /(discord\.(gg|io|me|li)|discordapp\.com\/invite|discord\.com\/invite)\/[^\s]+/i;
-
-
-        if ((linkRegex.test(message.content) && !gifRegex.test(message.content)) || inviteRegex.test(message.content)) {
-            message.delete().catch(() => {});
-            sendLog(message.guild, `${message.author.tag} tarafından gönderilen link içeren mesaj silindi: ${message.content}`);
-            message.channel.send(`${message.author}, bu sunucuda link paylaşamazsınız!`).then(msg => {
-                setTimeout(() => msg.delete(), 5000);
-            });
-            return;
-        }
-    }
-
-	if (!message.content.startsWith(prefix)) return;
-
-	const args = message.content.slice(prefix.length).trim().split(/ +/);
-	const commandName = args.shift().toLowerCase();
-
-	if (!client.commands.has(commandName)) return;
-
-	const command = client.commands.get(commandName);
-
-	try {
-		command.execute(message, args);
-	} catch (error) {
-		console.error(error);
-		message.reply('Bu komutu çalıştırırken bir hata oluştu!');
-	}
-});
+client.userMessages = userMessages;
+client.raidMode = raidMode;
+client.getConfig = getConfig;
 
 client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand() && !interaction.isButton() && !interaction.isStringSelectMenu()) return;
+    if (!interaction.isChatInputCommand()) return;
 
-    const command = client.commands.get('ayarlar');
-    if(command && typeof command.handleInteraction === 'function') {
-        await command.handleInteraction(interaction);
+    const command = interaction.client.commands.get(interaction.commandName);
+
+    if (!command || !command.data) { // Sadece slash komutlarını çalıştır
+        console.error(`${interaction.commandName} adında bir slash komutu bulunamadı.`);
+        return;
     }
 
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        console.error(error);
+        await interaction.reply({ content: 'Bu komutu çalıştırırken bir hata oluştu!', ephemeral: true });
+    }
 });
 
 async function sendLog(guild, message) {
@@ -174,19 +123,22 @@ async function jailUser(guild, memberToJail, executor, logMessage, eventType) {
     const rolesToRemove = memberToJail.roles.cache.filter(role => role.id !== guild.id && !role.managed).map(role => role.id);
 
     try {
+        let jailRoleMessage = 'Tüm rolleri alındı';
         if (rolesToRemove.length > 0) {
             await memberToJail.roles.remove(rolesToRemove, '[Guard] Yetkisiz işlem nedeniyle roller alındı.');
         }
         const jailRole = guild.roles.cache.get(config.settings.jailRoleId); 
         if (jailRole) {
             await memberToJail.roles.add(jailRole, '[Guard] Yetkisiz işlem nedeniyle cezalı rolü verildi.');
+            jailRoleMessage += ` ve <@&${jailRole.id}> rolü verildi.`;
+        } else {
+            jailRoleMessage += '\n❌ Cezalı rolü bulunamadığı için atanamadı.';
         }
 
         const logEmbed = new EmbedBuilder()
             .setColor('#ED4245')
             .setTitle('🚨 Yetkisiz İşlem Tespit Edildi')
             .setAuthor({ name: guild.name, iconURL: guild.iconURL() })
-            .setDescription(`**${executor.tag}** tarafından yapılan yetkisiz işlem geri alındı ve kullanıcı cezalandırıldı.`)
             .addFields(
                 { name: 'İşlemi Yapan', value: `${executor.tag} (\`${executor.id}\`)`, inline: true },
                 { name: 'Yapılan İşlem', value: `\`${logMessage}\``, inline: true },
@@ -198,7 +150,7 @@ async function jailUser(guild, memberToJail, executor, logMessage, eventType) {
         await sendLog(guild, logEmbed);
     } catch (error) {
         console.error('Rolleri alırken veya cezalı rolü verirken hata oluştu:', error);
-        sendLog(guild, `:x: **${executor.tag}** (\`${executor.id}\`) kullanıcısı yetkisiz işlem yapmaya çalıştı. Rolleri alırken veya cezalı rolü verirken hata oluştu! \`${logMessage}\``);
+        sendLog(guild, `❌ **${executor.tag}** (\`${executor.id}\`) kullanıcısı yetkisiz işlem yapmaya çalıştı. Rolleri alırken veya cezalı rolü verirken hata oluştu! \`${logMessage}\``);
     }
 }
 
@@ -344,30 +296,7 @@ client.on('webhookUpdate', async (channel) => {
     }
 });
 
-client.on('guildMemberAdd', member => {
-    const { raid } = getConfig().settings;
-    if (!raid.enabled) return;
-
-    if (raidMode) {
-        member.kick('Sunucu şu anda raid modunda.');
-        sendLog(member.guild, `Raid modunda olduğu için ${member.user.tag} atıldı.`);
-        return;
-    }
-
-    const now = Date.now();
-    recentJoins.push(now);
-
-    const recentJoinCount = recentJoins.filter(time => now - time < raid.time).length;
-
-    if (recentJoinCount >= raid.userCount) {
-        raidMode = true;
-        sendLog(member.guild, `Raid algılandı! Raid modu etkinleştirildi.`);
-        setTimeout(() => {
-            raidMode = false;
-            sendLog(member.guild, `Raid modu devre dışı bırakıldı.`);
-        }, 60000);
-    }
-});
+client.sendLog = sendLog;
 
 const { token } = getConfig();
 client.login(token);
