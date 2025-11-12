@@ -45,6 +45,7 @@ const userMessages = new Map();
 let raidMode = false;
 const recentJoins = [];
 
+client.recentJoins = recentJoins;
 function getConfig() {
     const configPath = path.resolve(__dirname, './config.json');
     const config = JSON.parse(fs.readFileSync(configPath));
