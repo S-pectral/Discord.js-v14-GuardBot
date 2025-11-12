@@ -1,5 +1,3 @@
-# Node.js bağımlılıkları
-node_modules/
-
-# Konfigürasyon dosyası (Token gibi hassas bilgiler içerir)
+node_modules
 config.json
+.env
