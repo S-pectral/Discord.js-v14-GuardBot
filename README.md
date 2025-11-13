@@ -106,7 +106,10 @@ Guard Bot, Discord sunucunuzu spam, raid, yetkisiz kanal/rol değişiklikleri, i
 
 ## Kullanım
 
--   `!ayarlar`: Botun ana ayarlar menüsünü açar. Bu menüden tüm koruma ve cezalandırma ayarlarını yönetebilirsiniz.
+-   `!ayarlar`: Ana ayarlar menüsünü açar. Bu menüden tüm koruma ve cezalandırma ayarlarını yönetebilirsiniz.
+
+-   `/ayarla (seçenek)`: Ile uygun seçenekleri ve değerleri seçerek tum ayarlari değiştirebilirsiniz.
+
 -   `!whitelist add <@kullanıcı/ID>`: Belirtilen kullanıcıyı whitelist'e ekler.
 -   `!whitelist remove <@kullanıcı/ID>`: Belirtilen kullanıcıyı whitelist'ten çıkarır.
 -   `!whitelist list`: Whitelist'teki tüm kullanıcıları listeler.
